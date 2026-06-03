@@ -9,12 +9,21 @@ class CourseController extends Controller
 {
     public function index()
     {
-        // Cogemos solo los cursos que están publicados
-        $courses = Course::where('status', 'published')->get();
+        $courses = Course::query()
+            ->with(['category:id,name', 'teacher:id,name'])
+            ->where('is_hidden', false)
+            ->orderBy('title')
+            ->get();
 
-        // Le mandamos los cursos a "Courses/Index"
+        $categories = $courses
+            ->pluck('category')
+            ->filter()
+            ->unique('id')
+            ->values();
+
         return Inertia::render('Courses/Index', [
-            'courses' => $courses
+            'courses' => $courses,
+            'categories' => $categories,
         ]);
     }
 }
