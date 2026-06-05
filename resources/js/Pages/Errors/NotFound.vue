@@ -13,12 +13,20 @@ import { Head, Link } from '@inertiajs/vue3';
             <p class="mt-4 max-w-xl text-slate-300">
                 La ruta que intentaste abrir no existe o fue movida. Vuelve al inicio para continuar navegando.
             </p>
-            <Link
-                :href="route('home')"
-                class="mt-8 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 font-semibold text-white shadow-lg shadow-cyan-700/25 transition hover:brightness-110"
-            >
-                Volver al Inicio
-            </Link>
+            <div class="mt-8 flex flex-wrap justify-center gap-3">
+                <Link
+                    :href="route('home')"
+                    class="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 font-semibold text-white shadow-lg shadow-cyan-700/25 transition hover:brightness-110"
+                >
+                    ← Volver al Inicio
+                </Link>
+                <Link
+                    :href="route('courses.index')"
+                    class="rounded-lg border border-cyan-500/40 px-6 py-3 font-semibold text-cyan-300 transition hover:bg-cyan-500/10"
+                >
+                    📚 Ver Cursos
+                </Link>
+            </div>
         </section>
     </PublicLayout>
 </template>
