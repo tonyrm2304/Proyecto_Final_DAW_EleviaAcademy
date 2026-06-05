@@ -16,6 +16,7 @@ const form = useForm({
 const successMessage = computed(() => page.props.flash?.success ?? null);
 
 const submit = () => {
+    form.email = form.email.trim().toLowerCase();
     form.post(route('contact.submit'), {
         preserveScroll: true,
         onSuccess: () => form.reset('subject', 'message'),
@@ -64,7 +65,9 @@ const submit = () => {
                                 v-model="form.email"
                                 type="email"
                                 placeholder="Tu email"
+                                autocomplete="email"
                                 class="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-slate-100 placeholder-slate-400 outline-none transition focus:border-cyan-400"
+                                @blur="form.email = form.email.trim()"
                             >
                             <p v-if="form.errors.email" class="mt-1 text-xs text-rose-400">{{ form.errors.email }}</p>
                         </div>
