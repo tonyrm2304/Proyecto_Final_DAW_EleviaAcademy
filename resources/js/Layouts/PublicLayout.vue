@@ -15,6 +15,7 @@ const props = defineProps({
 
 const page = usePage();
 const logoError = ref(false);
+const mobileMenuOpen = ref(false);
 
 const user = computed(() => page.props.auth?.user ?? null);
 
@@ -28,12 +29,15 @@ const navItems = [
 
 <template>
     <div class="min-h-screen bg-slate-950 text-slate-100">
-        <header class="sticky top-0 z-40 border-b border-cyan-500/20 bg-slate-950/95 backdrop-blur">
+        <header
+            class="sticky top-0 z-40 border-b border-cyan-500/20 backdrop-blur"
+            style="background-image: linear-gradient(rgba(2,6,23,.86), rgba(2,6,23,.86)), url('/imagenes/fondos/Navbar.jpg'); background-size: cover; background-position: center;"
+        >
             <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <Link :href="route('home')" class="group inline-flex items-center gap-3">
                     <img
                         v-if="!logoError"
-                        src="/Logo%20EA.jpg"
+                        src="/imagenes/logo/Logo_EA.jpg"
                         alt="Logo Elevia Academy"
                         class="h-9 w-9 rounded-lg object-cover ring-1 ring-cyan-400/50"
                         @error="logoError = true"
@@ -69,6 +73,53 @@ const navItems = [
                         {{ user ? 'Mi panel' : 'Acceder' }}
                     </Link>
                 </nav>
+
+                <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-md p-2 text-slate-200 transition hover:bg-slate-800 hover:text-cyan-300 md:hidden"
+                    @click="mobileMenuOpen = !mobileMenuOpen"
+                    aria-label="Abrir menú"
+                >
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path
+                            :class="{ hidden: mobileMenuOpen, 'inline-flex': !mobileMenuOpen }"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                        />
+                        <path
+                            :class="{ hidden: !mobileMenuOpen, 'inline-flex': mobileMenuOpen }"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <div v-if="mobileMenuOpen" class="border-t border-cyan-500/20 md:hidden">
+                <nav class="space-y-1 px-4 py-3">
+                    <Link
+                        v-for="item in navItems"
+                        :key="`mobile-${item.key}`"
+                        :href="route(item.route)"
+                        class="block rounded-md px-3 py-2 text-sm font-medium"
+                        :class="props.active === item.key ? 'bg-slate-800 text-cyan-300' : 'text-slate-200 hover:bg-slate-800 hover:text-cyan-300'"
+                        @click="mobileMenuOpen = false"
+                    >
+                        {{ item.label }}
+                    </Link>
+
+                    <Link
+                        :href="user ? route('dashboard') : route('login')"
+                        class="mt-2 block rounded-md bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-center text-sm font-semibold text-white"
+                        @click="mobileMenuOpen = false"
+                    >
+                        {{ user ? 'Mi panel' : 'Acceder' }}
+                    </Link>
+                </nav>
             </div>
         </header>
 
@@ -82,7 +133,7 @@ const navItems = [
                     <div class="mb-3 inline-flex items-center gap-3">
                         <img
                             v-if="!logoError"
-                            src="/Logo%20EA.jpg"
+                            src="/imagenes/logo/Logo_EA.jpg"
                             alt="Logo Elevia Academy"
                             class="h-10 w-10 rounded-lg object-cover ring-1 ring-cyan-400/50"
                         >
@@ -91,9 +142,7 @@ const navItems = [
                             <span class="text-slate-100"> Academy</span>
                         </span>
                     </div>
-                    <p class="max-w-xs text-slate-300">
-                        Impulsa tu futuro digital con formación tecnológica orientada a resultados reales.
-                    </p>
+                    <p class="max-w-xs text-slate-300">Eleva tu lado digital.</p>
                 </div>
 
                 <div>

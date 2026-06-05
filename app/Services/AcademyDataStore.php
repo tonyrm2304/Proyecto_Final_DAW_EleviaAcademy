@@ -18,6 +18,9 @@ class AcademyDataStore
         return [
             'enrollments' => [],
             'progress' => [],
+            'learning' => [],
+            'course_tasks' => [],
+            'course_exams' => [],
             'materials' => [],
             'announcements' => [],
             'messages' => [],
@@ -26,6 +29,47 @@ class AcademyDataStore
                 'message' => 1,
                 'material' => 1,
             ],
+        ];
+    }
+
+    private function defaultTaskDefinitions(int $courseId): array
+    {
+        return [
+            [
+                'id' => 1,
+                'course_id' => $courseId,
+                'title' => 'Tarea 1: Actividad práctica inicial',
+                'description' => 'Entrega introductoria para validar conceptos básicos del curso.',
+                'is_visible' => true,
+                'deadline' => null,
+            ],
+            [
+                'id' => 2,
+                'course_id' => $courseId,
+                'title' => 'Tarea 2: Caso aplicado',
+                'description' => 'Resolución guiada de un caso con entrega individual.',
+                'is_visible' => true,
+                'deadline' => null,
+            ],
+            [
+                'id' => 3,
+                'course_id' => $courseId,
+                'title' => 'Tarea 3: Entrega final del módulo',
+                'description' => 'Trabajo final corto para consolidar el bloque didáctico.',
+                'is_visible' => true,
+                'deadline' => null,
+            ],
+        ];
+    }
+
+    private function defaultExamDefinition(int $courseId): array
+    {
+        return [
+            'course_id' => $courseId,
+            'title' => 'Evaluación final',
+            'description' => 'Prueba final del curso para validación de competencias.',
+            'is_active' => true,
+            'deadline' => null,
         ];
     }
 
@@ -145,6 +189,11 @@ class AcademyDataStore
                 ->map(fn ($id) => (int) $id)
                 ->values()
                 ->all();
+
+            foreach ($data['enrollments'][$userKey] as $courseId) {
+                $this->ensureLearningStateInData($data, $userId, (int) $courseId);
+            }
+
             $this->writeData($data);
         }
 
@@ -181,6 +230,8 @@ class AcademyDataStore
         }
 
         $data['enrollments'][$key] = $current->values()->all();
+        $this->ensureLearningStateInData($data, $studentId, $courseId);
+        $this->recalculateProgressInData($data, $studentId, $courseId);
         $this->writeData($data);
     }
 
@@ -199,17 +250,37 @@ class AcademyDataStore
             unset($data['progress'][$key][(string) $courseId]);
         }
 
+        if (isset($data['learning'][$key][(string) $courseId])) {
+            unset($data['learning'][$key][(string) $courseId]);
+        }
+
         $this->writeData($data);
     }
 
     public function setProgress(int $studentId, int $courseId, int $value): void
     {
+        $clamped = max(0, min(100, $value));
+
         $data = $this->readData();
         $studentKey = (string) $studentId;
         $courseKey = (string) $courseId;
 
-        $data['progress'][$studentKey] ??= [];
-        $data['progress'][$studentKey][$courseKey] = max(0, min(100, $value));
+        $this->ensureLearningStateInData($data, $studentId, $courseId);
+
+        $data['learning'][$studentKey][$courseKey]['content_completed'] = $clamped >= 50;
+
+        $taskCompleted = $clamped >= 60 ? 1 : 0;
+        $taskCompleted += $clamped >= 70 ? 1 : 0;
+        $taskCompleted += $clamped >= 80 ? 1 : 0;
+
+        $data['learning'][$studentKey][$courseKey]['tasks_submitted'] = [
+            $taskCompleted >= 1,
+            $taskCompleted >= 2,
+            $taskCompleted >= 3,
+        ];
+
+        $data['learning'][$studentKey][$courseKey]['exam_passed'] = $clamped >= 100;
+        $this->recalculateProgressInData($data, $studentId, $courseId);
 
         $this->writeData($data);
     }
@@ -219,7 +290,160 @@ class AcademyDataStore
         $data = $this->readData();
         $studentKey = (string) $studentId;
 
+        $courseIds = collect($data['enrollments'][$studentKey] ?? [])->map(fn ($id) => (int) $id)->all();
+
+        foreach ($courseIds as $courseId) {
+            $this->ensureLearningStateInData($data, $studentId, $courseId);
+            $this->recalculateProgressInData($data, $studentId, $courseId);
+        }
+
+        $this->writeData($data);
+
         return $data['progress'][$studentKey] ?? [];
+    }
+
+    public function getLearningStateForStudent(int $studentId): array
+    {
+        $data = $this->readData();
+        $studentKey = (string) $studentId;
+
+        return $data['learning'][$studentKey] ?? [];
+    }
+
+    public function completeCourseContent(int $studentId, int $courseId): void
+    {
+        $data = $this->readData();
+        $this->ensureLearningStateInData($data, $studentId, $courseId);
+
+        $studentKey = (string) $studentId;
+        $courseKey = (string) $courseId;
+        $data['learning'][$studentKey][$courseKey]['content_completed'] = true;
+
+        $this->recalculateProgressInData($data, $studentId, $courseId);
+        $this->writeData($data);
+    }
+
+    public function submitTask(int $studentId, int $courseId, int $taskNumber): void
+    {
+        if (! in_array($taskNumber, [1, 2, 3], true)) {
+            return;
+        }
+
+        $data = $this->readData();
+        $this->ensureLearningStateInData($data, $studentId, $courseId);
+
+        $studentKey = (string) $studentId;
+        $courseKey = (string) $courseId;
+        $index = $taskNumber - 1;
+
+        $data['learning'][$studentKey][$courseKey]['tasks_submitted'][$index] = true;
+
+        $this->recalculateProgressInData($data, $studentId, $courseId);
+        $this->writeData($data);
+    }
+
+    public function setTaskGrade(int $studentId, int $courseId, int $taskNumber, ?float $grade): void
+    {
+        if (! in_array($taskNumber, [1, 2, 3], true)) {
+            return;
+        }
+
+        $data = $this->readData();
+        $this->ensureLearningStateInData($data, $studentId, $courseId);
+
+        $studentKey = (string) $studentId;
+        $courseKey = (string) $courseId;
+
+        $data['learning'][$studentKey][$courseKey]['grades']['task'.$taskNumber] = $grade;
+        $this->writeData($data);
+    }
+
+    public function setExamResult(int $studentId, int $courseId, bool $passed, ?float $grade = null): void
+    {
+        $data = $this->readData();
+        $this->ensureLearningStateInData($data, $studentId, $courseId);
+
+        $studentKey = (string) $studentId;
+        $courseKey = (string) $courseId;
+
+        $data['learning'][$studentKey][$courseKey]['exam_passed'] = $passed;
+        $data['learning'][$studentKey][$courseKey]['grades']['final'] = $grade;
+
+        $this->recalculateProgressInData($data, $studentId, $courseId);
+        $this->writeData($data);
+    }
+
+    public function getCourseTaskDefinitions(int $courseId): array
+    {
+        $data = $this->readData();
+        $courseKey = (string) $courseId;
+
+        if (! isset($data['course_tasks'][$courseKey]) || count($data['course_tasks'][$courseKey]) !== 3) {
+            $data['course_tasks'][$courseKey] = $this->defaultTaskDefinitions($courseId);
+            $this->writeData($data);
+        }
+
+        return $data['course_tasks'][$courseKey] ?? $this->defaultTaskDefinitions($courseId);
+    }
+
+    public function setCourseTaskDefinitions(int $courseId, array $tasks): void
+    {
+        $normalized = collect($tasks)
+            ->take(3)
+            ->values()
+            ->map(function (array $task, int $index) use ($courseId) {
+                return [
+                    'id' => $index + 1,
+                    'course_id' => $courseId,
+                    'title' => (string) ($task['title'] ?? 'Tarea '.($index + 1)),
+                    'description' => (string) ($task['description'] ?? ''),
+                    'is_visible' => (bool) ($task['is_visible'] ?? true),
+                    'deadline' => $task['deadline'] ?? null,
+                ];
+            })
+            ->all();
+
+        while (count($normalized) < 3) {
+            $next = count($normalized) + 1;
+            $normalized[] = [
+                'id' => $next,
+                'course_id' => $courseId,
+                'title' => 'Tarea '.$next,
+                'description' => '',
+                'is_visible' => true,
+                'deadline' => null,
+            ];
+        }
+
+        $data = $this->readData();
+        $data['course_tasks'][(string) $courseId] = $normalized;
+        $this->writeData($data);
+    }
+
+    public function getCourseExamDefinition(int $courseId): array
+    {
+        $data = $this->readData();
+        $courseKey = (string) $courseId;
+
+        if (! isset($data['course_exams'][$courseKey])) {
+            $data['course_exams'][$courseKey] = $this->defaultExamDefinition($courseId);
+            $this->writeData($data);
+        }
+
+        return $data['course_exams'][$courseKey] ?? $this->defaultExamDefinition($courseId);
+    }
+
+    public function setCourseExamDefinition(int $courseId, string $title, string $description, bool $isActive, ?string $deadline = null): void
+    {
+        $data = $this->readData();
+        $data['course_exams'][(string) $courseId] = [
+            'course_id' => $courseId,
+            'title' => $title,
+            'description' => $description,
+            'is_active' => $isActive,
+            'deadline' => $deadline,
+        ];
+        $this->writeData($data);
     }
 
     public function getMaterialsForCourses(array $courseIds): array
@@ -312,7 +536,7 @@ class AcademyDataStore
             ->all();
     }
 
-    public function addAnnouncement(int $courseId, int $authorId, string $title, string $body): void
+    public function addAnnouncement(int $courseId, int $authorId, string $title, string $body, string $type = 'general'): void
     {
         $data = $this->readData();
         $id = $this->nextCounter($data, 'announcement');
@@ -321,6 +545,7 @@ class AcademyDataStore
             'id' => $id,
             'course_id' => $courseId,
             'author_id' => $authorId,
+            'type' => $type,
             'title' => $title,
             'body' => $body,
             'created_at' => Carbon::now()->toIso8601String(),
@@ -341,18 +566,70 @@ class AcademyDataStore
 
     public function addMessage(int $fromId, int $toId, ?int $courseId, string $subject, string $body): void
     {
+        $this->addMessageWithThread($fromId, $toId, $courseId, $subject, $body);
+    }
+
+    public function addMessageWithThread(int $fromId, int $toId, ?int $courseId, string $subject, string $body, ?string $threadId = null, ?int $replyToId = null, bool $isPrivate = false): void
+    {
         $data = $this->readData();
         $id = $this->nextCounter($data, 'message');
+
+        $finalThreadId = $threadId ?: $this->buildThreadId($fromId, $toId, $courseId);
 
         $data['messages'][] = [
             'id' => $id,
             'from_id' => $fromId,
             'to_id' => $toId,
             'course_id' => $courseId,
+            'thread_id' => $finalThreadId,
+            'reply_to_id' => $replyToId,
             'subject' => $subject,
             'body' => $body,
+            'is_private' => $isPrivate,
             'created_at' => Carbon::now()->toIso8601String(),
         ];
+
+        $this->writeData($data);
+    }
+
+    public function threadMessagesForUser(int $userId, string $threadId): array
+    {
+        return collect($this->readData()['messages'] ?? [])
+            ->filter(function (array $msg) use ($userId, $threadId) {
+                $isParticipant = (int) ($msg['from_id'] ?? 0) === $userId || (int) ($msg['to_id'] ?? 0) === $userId;
+                $isPrivate = (bool) ($msg['is_private'] ?? false);
+                $isSameThread = (string) ($msg['thread_id'] ?? '') === $threadId;
+
+                // Si es privado, solo pueden verlo los participantes
+                if ($isPrivate) {
+                    return $isParticipant && $isSameThread;
+                }
+
+                // Si no es privado, solo pueden verlo los participantes (miembros del curso/hilo)
+                return $isParticipant && $isSameThread;
+            })
+            ->sortBy('created_at')
+            ->values()
+            ->all();
+    }
+
+    public function allMessagesForUser(int $userId): array
+    {
+        return collect($this->readData()['messages'] ?? [])
+            ->filter(fn (array $msg) => (int) ($msg['from_id'] ?? 0) === $userId || (int) ($msg['to_id'] ?? 0) === $userId)
+            ->sortByDesc('created_at')
+            ->values()
+            ->all();
+    }
+
+    public function removeThread(string $threadId): void
+    {
+        $data = $this->readData();
+
+        $data['messages'] = collect($data['messages'] ?? [])
+            ->reject(fn (array $msg) => (string) ($msg['thread_id'] ?? '') === $threadId)
+            ->values()
+            ->all();
 
         $this->writeData($data);
     }
@@ -386,5 +663,117 @@ class AcademyDataStore
         }
 
         return $query->orderBy('title')->get();
+    }
+
+    public function visibleAndHiddenCoursesForRole(?int $teacherId, bool $isAdmin): Collection
+    {
+        $query = Course::query()
+            ->with(['category:id,name', 'teacher:id,name']);
+
+        if (! $isAdmin && $teacherId !== null) {
+            $query->where('teacher_id', $teacherId);
+        }
+
+        return $query->orderBy('title')->get();
+    }
+
+    private function buildThreadId(int $fromId, int $toId, ?int $courseId): string
+    {
+        $pair = [$fromId, $toId];
+        sort($pair);
+
+        return implode('-', [
+            't',
+            $pair[0],
+            $pair[1],
+            $courseId ?? 0,
+        ]);
+    }
+
+    private function ensureLearningStateInData(array &$data, int $studentId, int $courseId): void
+    {
+        $studentKey = (string) $studentId;
+        $courseKey = (string) $courseId;
+
+        $data['learning'][$studentKey] ??= [];
+        $data['learning'][$studentKey][$courseKey] ??= [
+            'content_completed' => false,
+            'tasks_submitted' => [false, false, false],
+            'task_submissions' => [
+                'task1' => null,
+                'task2' => null,
+                'task3' => null,
+            ],
+            'exam_passed' => false,
+            'grades' => [
+                'task1' => null,
+                'task2' => null,
+                'task3' => null,
+                'final' => null,
+            ],
+        ];
+
+        $data['learning'][$studentKey][$courseKey]['task_submissions'] ??= [];
+
+        for ($taskNumber = 1; $taskNumber <= 3; $taskNumber++) {
+            $key = 'task'.$taskNumber;
+            if (! array_key_exists($key, $data['learning'][$studentKey][$courseKey]['task_submissions'])) {
+                $data['learning'][$studentKey][$courseKey]['task_submissions'][$key] = null;
+            }
+        }
+    }
+
+    public function submitTaskWithEvidence(int $studentId, int $courseId, int $taskNumber, string $filePath, string $originalName, string $observations = ''): void
+    {
+        if (! in_array($taskNumber, [1, 2, 3], true)) {
+            return;
+        }
+
+        $data = $this->readData();
+        $this->ensureLearningStateInData($data, $studentId, $courseId);
+
+        $studentKey = (string) $studentId;
+        $courseKey = (string) $courseId;
+        $index = $taskNumber - 1;
+        $taskKey = 'task'.$taskNumber;
+
+        $data['learning'][$studentKey][$courseKey]['tasks_submitted'][$index] = true;
+        $data['learning'][$studentKey][$courseKey]['task_submissions'][$taskKey] = [
+            'path' => $filePath,
+            'file_name' => $originalName,
+            'url' => '/storage/'.$filePath,
+            'observations' => $observations,
+            'submitted_at' => Carbon::now()->toIso8601String(),
+        ];
+
+        $this->recalculateProgressInData($data, $studentId, $courseId);
+        $this->writeData($data);
+    }
+
+    private function recalculateProgressInData(array &$data, int $studentId, int $courseId): void
+    {
+        $this->ensureLearningStateInData($data, $studentId, $courseId);
+
+        $studentKey = (string) $studentId;
+        $courseKey = (string) $courseId;
+        $state = $data['learning'][$studentKey][$courseKey];
+
+        $contentScore = ! empty($state['content_completed']) ? 50 : 0;
+
+        $tasks = collect($state['tasks_submitted'] ?? [false, false, false])
+            ->map(fn ($value) => (bool) $value)
+            ->take(3)
+            ->values()
+            ->all();
+
+        while (count($tasks) < 3) {
+            $tasks[] = false;
+        }
+
+        $taskScore = collect($tasks)->filter()->count() * 10;
+        $examScore = ! empty($state['exam_passed']) ? 20 : 0;
+
+        $data['progress'][$studentKey] ??= [];
+        $data['progress'][$studentKey][$courseKey] = max(0, min(100, $contentScore + $taskScore + $examScore));
     }
 }

@@ -15,15 +15,18 @@ const logoError = ref(false);
 
 <template>
     <div class="min-h-screen bg-slate-950 text-slate-100">
-        <nav class="border-b border-cyan-500/20 bg-slate-950/95 backdrop-blur">
+        <nav
+            class="border-b border-cyan-500/20 backdrop-blur"
+            style="background-image: linear-gradient(rgba(2,6,23,.86), rgba(2,6,23,.86)), url('/imagenes/fondos/Navbar.jpg'); background-size: cover; background-position: center;"
+        >
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 justify-between">
                     <div class="flex">
                         <div class="flex shrink-0 items-center">
-                            <Link :href="route('dashboard')" class="inline-flex items-center gap-3">
+                            <Link :href="route('home')" class="inline-flex items-center gap-3">
                                 <img
                                     v-if="!logoError"
-                                    src="/Logo%20EA.jpg"
+                                    src="/imagenes/logo/Logo_EA.jpg"
                                     alt="Logo Elevia Academy"
                                     class="h-9 w-9 rounded-lg object-cover ring-1 ring-cyan-400/50"
                                     @error="logoError = true"
@@ -40,38 +43,83 @@ const logoError = ref(false);
 
                         <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                             <NavLink
-                                :href="route('dashboard')"
-                                :active="route().current('dashboard')"
-                            >
-                                Inicio Panel
-                            </NavLink>
-
-                            <NavLink
                                 v-if="role === 'alumno'"
                                 :href="route('panel.alumno')"
-                                :active="route().current('panel.alumno')"
+                                :active="route().current('panel.alumno') || route().current('panel.alumno.course')"
                             >
                                 Mi Panel Alumno
                             </NavLink>
 
                             <NavLink
+                                v-if="role === 'alumno'"
+                                :href="route('panel.messages')"
+                                :active="route().current('panel.messages')"
+                            >
+                                Mensajes
+                            </NavLink>
+
+                            <NavLink
+                                v-if="role === 'alumno'"
+                                :href="route('panel.announcements')"
+                                :active="route().current('panel.announcements')"
+                            >
+                                Tablón
+                            </NavLink>
+
+                            <NavLink
                                 v-if="role === 'profesor' || role === 'admin'"
                                 :href="route('panel.profesor')"
-                                :active="route().current('panel.profesor')"
+                                :active="route().current('panel.profesor') || route().current('panel.profesor.course')"
                             >
-                                Panel Profesor
+                                {{ role === 'admin' ? 'Panel Profesor Administrador' : 'Panel Profesor' }}
+                            </NavLink>
+
+                            <NavLink
+                                v-if="role === 'profesor' || role === 'admin'"
+                                :href="route('panel.messages')"
+                                :active="route().current('panel.messages')"
+                            >
+                                Mensajes
+                            </NavLink>
+
+                            <NavLink
+                                v-if="role === 'profesor' || role === 'admin'"
+                                :href="route('panel.announcements')"
+                                :active="route().current('panel.announcements')"
+                            >
+                                Tablón
+                            </NavLink>
+
+                            <NavLink
+                                v-if="role === 'admin'"
+                                :href="route('panel.admin.students')"
+                                :active="route().current('panel.admin.students')"
+                            >
+                                Gestión Alumnos
+                            </NavLink>
+
+                            <NavLink
+                                v-if="role === 'admin'"
+                                :href="route('panel.admin.teachers')"
+                                :active="route().current('panel.admin.teachers')"
+                            >
+                                Gestión Profesores
                             </NavLink>
                         </div>
                     </div>
 
                     <div class="hidden sm:ms-6 sm:flex sm:items-center">
                         <div class="relative ms-3">
-                            <Dropdown align="right" width="48">
+                            <Dropdown
+                                align="right"
+                                width="48"
+                                content-classes="py-1 bg-slate-900/95 border border-cyan-500/20"
+                            >
                                 <template #trigger>
                                     <span class="inline-flex rounded-md">
                                         <button
                                             type="button"
-                                            class="inline-flex items-center rounded-md border border-transparent bg-slate-900 px-3 py-2 text-sm font-medium leading-4 text-slate-200 transition hover:text-cyan-300 focus:outline-none"
+                                            class="inline-flex items-center rounded-md border border-cyan-400/25 bg-slate-900/80 px-3 py-2 text-sm font-semibold leading-4 text-slate-100 shadow-sm transition hover:border-cyan-400/50 hover:text-cyan-200 focus:outline-none"
                                         >
                                             {{ $page.props.auth.user.name }}
                                             <svg
@@ -128,34 +176,75 @@ const logoError = ref(false);
 
             <div
                 :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }"
-                class="sm:hidden"
+                class="border-t border-cyan-500/20 bg-slate-950/90 sm:hidden"
             >
                 <div class="space-y-1 pb-3 pt-2">
                     <ResponsiveNavLink
-                        :href="route('dashboard')"
-                        :active="route().current('dashboard')"
-                    >
-                        Inicio Panel
-                    </ResponsiveNavLink>
-
-                    <ResponsiveNavLink
                         v-if="role === 'alumno'"
                         :href="route('panel.alumno')"
-                        :active="route().current('panel.alumno')"
+                        :active="route().current('panel.alumno') || route().current('panel.alumno.course')"
                     >
                         Mi Panel Alumno
                     </ResponsiveNavLink>
 
                     <ResponsiveNavLink
+                        v-if="role === 'alumno'"
+                        :href="route('panel.messages')"
+                        :active="route().current('panel.messages')"
+                    >
+                        Mensajes
+                    </ResponsiveNavLink>
+
+                    <ResponsiveNavLink
+                        v-if="role === 'alumno'"
+                        :href="route('panel.announcements')"
+                        :active="route().current('panel.announcements')"
+                    >
+                        Tablón
+                    </ResponsiveNavLink>
+
+                    <ResponsiveNavLink
                         v-if="role === 'profesor' || role === 'admin'"
                         :href="route('panel.profesor')"
-                        :active="route().current('panel.profesor')"
+                        :active="route().current('panel.profesor') || route().current('panel.profesor.course')"
                     >
-                        Panel Profesor
+                        {{ role === 'admin' ? 'Panel Profesor Administrador' : 'Panel Profesor' }}
+                    </ResponsiveNavLink>
+
+                    <ResponsiveNavLink
+                        v-if="role === 'profesor' || role === 'admin'"
+                        :href="route('panel.messages')"
+                        :active="route().current('panel.messages')"
+                    >
+                        Mensajes
+                    </ResponsiveNavLink>
+
+                    <ResponsiveNavLink
+                        v-if="role === 'profesor' || role === 'admin'"
+                        :href="route('panel.announcements')"
+                        :active="route().current('panel.announcements')"
+                    >
+                        Tablón
+                    </ResponsiveNavLink>
+
+                    <ResponsiveNavLink
+                        v-if="role === 'admin'"
+                        :href="route('panel.admin.students')"
+                        :active="route().current('panel.admin.students')"
+                    >
+                        Gestión Alumnos
+                    </ResponsiveNavLink>
+
+                    <ResponsiveNavLink
+                        v-if="role === 'admin'"
+                        :href="route('panel.admin.teachers')"
+                        :active="route().current('panel.admin.teachers')"
+                    >
+                        Gestión Profesores
                     </ResponsiveNavLink>
                 </div>
 
-                <div class="border-t border-slate-800 pb-1 pt-4">
+                <div class="border-t border-cyan-500/20 pb-1 pt-4">
                     <div class="px-4">
                         <div class="text-base font-medium text-slate-100">
                             {{ $page.props.auth.user.name }}

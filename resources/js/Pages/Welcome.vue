@@ -1,5 +1,6 @@
 <script setup>
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import { courseImageByTitle } from '@/utils/courseImages';
 import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({
@@ -47,9 +48,12 @@ const features = [
     <Head title="Inicio" />
 
     <PublicLayout active="inicio">
-        <section class="relative overflow-hidden border-b border-cyan-500/20 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950">
+        <section
+            class="relative overflow-hidden border-b border-cyan-500/20"
+            style="background-image: linear-gradient(rgba(2,6,23,.76), rgba(2,6,23,.86)), url('/imagenes/fondos/Fondo_Formacion.jpg'); background-size: cover; background-position: center;"
+        >
             <div class="mx-auto flex w-full max-w-7xl flex-col items-center px-4 py-16 text-center sm:px-6 lg:px-8">
-                <h1 class="max-w-3xl text-4xl font-extrabold leading-tight text-white md:text-6xl">
+                <h1 class="max-w-3xl text-4xl font-extrabold leading-tight text-white md:text-6xl drop-shadow">
                     Formación tecnológica para crecer con impacto real
                 </h1>
                 <p class="mt-5 max-w-2xl text-lg text-slate-300">
@@ -110,18 +114,32 @@ const features = [
                 <article
                     v-for="course in courses"
                     :key="course.id"
-                    class="rounded-2xl border border-cyan-500/20 bg-slate-900/70"
+                    class="flex h-full flex-col overflow-hidden rounded-2xl border border-cyan-500/20 bg-slate-900/70"
                 >
-                    <div class="h-24 rounded-t-2xl bg-gradient-to-r from-blue-500 to-cyan-500" />
-                    <div class="p-5">
+                    <img
+                        :src="courseImageByTitle(course.title)"
+                        :alt="course.title"
+                        class="h-44 w-full object-cover"
+                        @error="$event.target.src = '/imagenes/logo/Logo_EA.jpg'"
+                    >
+                    <div class="flex flex-1 flex-col p-5">
                         <h3 class="text-xl font-bold text-white">{{ course.title }}</h3>
                         <p class="mt-2 line-clamp-3 text-sm text-slate-300">{{ course.short_description }}</p>
-                        <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
+                        <div class="mt-auto pt-4 flex items-center justify-between text-xs text-slate-400">
                             <span>{{ course.category?.name ?? 'General' }}</span>
                             <span>{{ course.duration_hours }} horas</span>
                         </div>
                     </div>
                 </article>
+            </div>
+
+            <div class="mt-8 flex justify-center">
+                <Link
+                    :href="route('courses.index')"
+                    class="rounded-lg border border-cyan-500/40 bg-slate-900/70 px-6 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/10"
+                >
+                    Ver más cursos
+                </Link>
             </div>
         </section>
     </PublicLayout>

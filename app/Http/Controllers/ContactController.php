@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContactSubmission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,7 +17,7 @@ class ContactController extends Controller
 
     public function submit(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:120'],
             'subject' => ['required', 'string', 'max:150'],
@@ -24,6 +25,14 @@ class ContactController extends Controller
             'accept_policy' => ['accepted'],
         ]);
 
-        return back()->with('success', 'Gracias por contactar con Elevia Academy. Te responderemos en menos de 24h laborables.');
+        ContactSubmission::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'subject' => $validated['subject'],
+            'message' => $validated['message'],
+            'privacy_accepted' => true,
+        ]);
+
+        return back()->with('success', 'Gracias por contactar con Elevia Academy. Te responderemos en breves.');
     }
 }

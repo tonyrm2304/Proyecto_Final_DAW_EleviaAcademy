@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -35,6 +36,18 @@ class ProfileController extends Controller
             $request->user()->email_verified_at = null;
         }
 
+        if ($request->hasFile('avatar')) {
+            $user = $request->user();
+            $oldAvatar = (string) ($user->avatar ?? '');
+
+            $path = $request->file('avatar')->store('perfiles', 'public');
+            $user->avatar = $path;
+
+            if ($oldAvatar !== '' && $oldAvatar !== 'default-avatar.png' && Storage::disk('public')->exists($oldAvatar)) {
+                Storage::disk('public')->delete($oldAvatar);
+            }
+        }
+
         $request->user()->save();
 
         return Redirect::route('profile.edit');
@@ -45,6 +58,10 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        if ($request->user()->role === 'alumno') {
+            abort(403);
+        }
+
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);

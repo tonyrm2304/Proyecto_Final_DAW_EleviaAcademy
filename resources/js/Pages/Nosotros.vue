@@ -1,13 +1,6 @@
 <script setup>
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { Head } from '@inertiajs/vue3';
-
-const team = [
-    { name: 'Alejandro Ruiz', role: 'Instructor Backend' },
-    { name: 'Marta López', role: 'Mentora Frontend' },
-    { name: 'Sofía Gálvez', role: 'Coach de Carrera' },
-    { name: 'Daniel Soto', role: 'Tutor DevOps' },
-];
 </script>
 
 <template>
@@ -29,28 +22,23 @@ const team = [
                 </article>
 
                 <article class="rounded-2xl border border-cyan-500/20 bg-slate-900/70 p-7">
-                    <h2 class="text-2xl font-bold text-cyan-300">En números</h2>
+                    <h2 class="text-2xl font-bold text-cyan-300">¿Por qué elegirnos?</h2>
                     <ul class="mt-5 space-y-3 text-slate-200">
-                        <li><span class="font-black text-cyan-300">50K+</span> estudiantes activos</li>
-                        <li><span class="font-black text-cyan-300">200+</span> cursos disponibles</li>
-                        <li><span class="font-black text-cyan-300">95%</span> satisfacción estudiantil</li>
+                        <li><span class="font-black text-cyan-300">✓</span> Cursos diseñados por profesionales en activo</li>
+                        <li><span class="font-black text-cyan-300">✓</span> Enfoque 100% práctico y aplicado</li>
+                        <li><span class="font-black text-cyan-300">✓</span> Mentorías personalizadas y soporte continuo</li>
                     </ul>
                 </article>
             </div>
 
-            <section class="mt-12">
+            <section class="mt-12 rounded-2xl border border-cyan-500/20 bg-slate-900/70 p-7">
                 <h2 class="text-center text-3xl font-extrabold text-white">Nuestro equipo</h2>
-                <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <article
-                        v-for="member in team"
-                        :key="member.name"
-                        class="rounded-2xl border border-cyan-500/20 bg-slate-900/70 p-5 text-center"
-                    >
-                        <div class="mx-auto h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500" />
-                        <h3 class="mt-4 font-bold text-white">{{ member.name }}</h3>
-                        <p class="text-sm text-slate-300">{{ member.role }}</p>
-                    </article>
-                </div>
+                <p class="mt-6 text-center text-slate-300 max-w-2xl mx-auto">
+                    Somos un equipo multidisciplinario de profesionales con más de 15 años de experiencia en desarrollo web, arquitectura de software e innovación digital. Cada miembro de Elevia Academy trae su expertise para asegurar que nuestros cursos están siempre alineados con las tecnologías y prácticas más actuales del mercado.
+                </p>
+                <p class="mt-4 text-center text-slate-400 text-sm">
+                    Combamos pasión por la educación tecnológica con rigor profesional.
+                </p>
             </section>
 
             <section class="mt-10 rounded-2xl border border-cyan-500/20 bg-slate-900/70 p-7">
