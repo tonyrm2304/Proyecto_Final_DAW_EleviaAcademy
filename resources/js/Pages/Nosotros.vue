@@ -34,10 +34,10 @@ import { Head } from '@inertiajs/vue3';
             <section class="mt-12 rounded-2xl border border-cyan-500/20 bg-slate-900/70 p-7">
                 <h2 class="text-center text-3xl font-extrabold text-white">Nuestro equipo</h2>
                 <p class="mt-6 text-center text-slate-300 max-w-2xl mx-auto">
-                    Somos un equipo multidisciplinario de profesionales con más de 15 años de experiencia en desarrollo web, arquitectura de software e innovación digital. Cada miembro de Elevia Academy trae su expertise para asegurar que nuestros cursos están siempre alineados con las tecnologías y prácticas más actuales del mercado.
+                    Somos un equipo multidisciplinar de profesionales apasionados por el desarrollo web, la arquitectura de software y la innovación digital. Nacemos como una academia joven y entusiasta, con una mentalidad adaptada al ritmo del sector tecnológico actual. Cada miembro de Elevia Academy aporta su energía y visión fresca para asegurar que nuestros cursos estén siempre alineados con las herramientas, metodologías y prácticas más reales del mercado.Somos un equipo multidisciplinario de profesionales con más de 15 años de experiencia en desarrollo web, arquitectura de software e innovación digital. Cada miembro de Elevia Academy trae su expertise para asegurar que nuestros cursos están siempre alineados con las tecnologías y prácticas más actuales del mercado.
                 </p>
                 <p class="mt-4 text-center text-slate-400 text-sm">
-                    Combamos pasión por la educación tecnológica con rigor profesional.
+                    Compartimos pasión por la educación tecnológica de vanguardia.
                 </p>
             </section>
 

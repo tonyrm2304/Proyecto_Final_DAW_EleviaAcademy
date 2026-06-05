@@ -79,16 +79,16 @@ const features = [
         <section class="border-b border-cyan-500/20 bg-slate-900/70">
             <div class="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 text-center sm:grid-cols-3 sm:px-6 lg:px-8">
                 <div>
-                    <p class="text-4xl font-black text-cyan-300">{{ courses.length }}+</p>
+                    <p class="text-4xl font-black text-cyan-300">6+</p>
                     <p class="text-slate-300">Cursos Disponibles</p>
                 </div>
                 <div>
-                    <p class="text-4xl font-black text-cyan-300">10k+</p>
-                    <p class="text-slate-300">Estudiantes Activos</p>
+                    <p class="text-4xl font-black text-cyan-300">+300</p>
+                    <p class="text-slate-300">Estudiantes Matriculados</p>
                 </div>
                 <div>
-                    <p class="text-4xl font-black text-cyan-300">95%</p>
-                    <p class="text-slate-300">Tasa de Satisfacción</p>
+                    <p class="text-4xl font-black text-cyan-300">100%</p>
+                    <p class="text-slate-300">Oportunidad de Empleo</p>
                 </div>
             </div>
         </section>
