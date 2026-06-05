@@ -490,17 +490,24 @@ class PanelActionsController extends Controller
 
     public function adminDeleteCourse(Request $request): RedirectResponse
     {
-        $this->ensureAdmin($request);
-
         $data = $request->validate([
             'course_id' => ['required', 'integer', 'exists:courses,id'],
             'confirm' => ['required', 'accepted'],
         ]);
 
         $course = Course::query()->findOrFail($data['course_id']);
+
+        if ($request->user()->role === 'profesor' && $course->teacher_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if ($request->user()->role === 'alumno') {
+            abort(403);
+        }
+
         $course->delete();
 
-        return back()->with('success', 'Curso eliminado del catálogo.');
+        return back()->with('success', 'Curso eliminado correctamente.');
     }
 
     public function createCourse(Request $request): RedirectResponse

@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { getCourseImage } from '@/utils/courseImages';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 const props = defineProps({
     course: { type: Object, required: true },
@@ -126,6 +126,20 @@ const studentGrade = (student, taskNumber) => student?.state?.grades?.[`task${ta
 const taskSubmission = (student, taskNumber) => student?.state?.task_submissions?.[`task${taskNumber}`] ?? null;
 
 const courseImage = computed(() => getCourseImage(props.course));
+
+const deleteConfirm = ref(false);
+
+const deleteCourse = () => {
+    if (!deleteConfirm.value) {
+        alert('Por favor confirma la eliminación.');
+        return;
+    }
+    if (confirm('⚠️ Esta acción eliminará el curso y toda su información. ¿Estás seguro?')) {
+        router.delete(route('panel.admin.courses.delete'), {
+            data: { course_id: props.course.id, confirm: true },
+        });
+    }
+};
 </script>
 
 <template>
@@ -311,8 +325,8 @@ const courseImage = computed(() => getCourseImage(props.course));
                 </form>
 
                 <div class="mt-8">
-                    <h4 class="text-lg font-bold text-white">Entregas recibidas (archivo + observaciones)</h4>
-                    <p class="mt-1 text-sm text-slate-300">Consulta evidencias subidas por el alumnado para cada tarea obligatoria.</p>
+                    <h4 class="text-lg font-bold text-white">Entregas recibidas</h4>
+                    <p class="mt-1 text-sm text-slate-300">Consulta las evidencias subidas por el alumnado para cada tarea obligatoria.</p>
 
                     <div class="mt-4 space-y-4">
                         <article
@@ -340,9 +354,6 @@ const courseImage = computed(() => getCourseImage(props.course));
                                         >
                                             Ver archivo: {{ taskSubmission(student, taskNumber).file_name }}
                                         </a>
-                                        <p class="mt-2 text-xs text-slate-300">
-                                            {{ taskSubmission(student, taskNumber).observations || 'Sin observaciones del alumno.' }}
-                                        </p>
                                     </template>
 
                                     <p v-else class="mt-2 text-xs text-slate-400">Sin entrega todavía.</p>
@@ -354,6 +365,23 @@ const courseImage = computed(() => getCourseImage(props.course));
                             No hay alumnado matriculado en este curso.
                         </p>
                     </div>
+                </div>
+
+                <div class="mt-8">
+                    <h4 class="text-lg font-bold text-rose-400">Zona de Riesgo</h4>
+                    <p class="mt-2 text-sm text-slate-300">Acciones que no se pueden deshacer. Procede con cuidado.</p>
+                    <form class="mt-4 rounded-lg border border-rose-500/30 bg-rose-900/10 p-4" @submit.prevent="deleteCourse">
+                        <p class="text-sm text-slate-200">Al eliminar este curso se borrará toda la información asociada (matrículas, tareas, entregas, etc.)</p>
+                        <div class="mt-3 flex gap-3">
+                            <button type="submit" class="rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-500">
+                                🗑️ Eliminar Curso
+                            </button>
+                            <label class="inline-flex items-center gap-2 text-xs text-slate-300">
+                                <input v-model="deleteConfirm" type="checkbox" class="rounded border-slate-600 bg-slate-900 text-rose-600 focus:ring-rose-500">
+                                Confirmo que quiero eliminar este curso
+                            </label>
+                        </div>
+                    </form>
                 </div>
             </div>
         </section>
