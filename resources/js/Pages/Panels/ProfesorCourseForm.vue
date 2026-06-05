@@ -18,7 +18,7 @@
                 class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                 placeholder="Ej: Introducción a React"
               />
-              <p v-if="errors.title" class="mt-1 text-sm text-red-600">{{ errors.title[0] }}</p>
+              <p v-if="form.errors.title" class="mt-1 text-sm text-red-600">{{ form.errors.title[0] }}</p>
             </div>
 
             <!-- Descripción corta -->
@@ -31,7 +31,7 @@
                 class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                 placeholder="Breve descripción que aparecerá en el catálogo"
               />
-              <p v-if="errors.short_description" class="mt-1 text-sm text-red-600">{{ errors.short_description[0] }}</p>
+              <p v-if="form.errors.short_description" class="mt-1 text-sm text-red-600">{{ form.errors.short_description[0] }}</p>
             </div>
 
             <!-- Descripción larga -->
@@ -44,7 +44,7 @@
                 class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                 placeholder="Descripción completa del curso, competencias, requisitos..."
               />
-              <p v-if="errors.long_description" class="mt-1 text-sm text-red-600">{{ errors.long_description[0] }}</p>
+              <p v-if="form.errors.long_description" class="mt-1 text-sm text-red-600">{{ form.errors.long_description[0] }}</p>
             </div>
 
             <!-- Duración -->
@@ -59,7 +59,7 @@
                   max="200"
                   class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                 />
-                <p v-if="errors.duration_hours" class="mt-1 text-sm text-red-600">{{ errors.duration_hours[0] }}</p>
+                <p v-if="form.errors.duration_hours" class="mt-1 text-sm text-red-600">{{ form.errors.duration_hours[0] }}</p>
               </div>
 
               <!-- Categoría -->
@@ -75,13 +75,13 @@
                     {{ cat.name }}
                   </option>
                 </select>
-                <p v-if="errors.category_id" class="mt-1 text-sm text-red-600">{{ errors.category_id[0] }}</p>
+                <p v-if="form.errors.category_id" class="mt-1 text-sm text-red-600">{{ form.errors.category_id[0] }}</p>
               </div>
             </div>
 
             <!-- Botones -->
             <div class="flex gap-3 pt-4">
-              <PrimaryButton :disabled="processing">
+              <PrimaryButton :disabled="form.processing">
                 {{ course ? 'Actualizar Curso' : 'Crear Curso' }}
               </PrimaryButton>
               <Link href="/panel/profesor" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
