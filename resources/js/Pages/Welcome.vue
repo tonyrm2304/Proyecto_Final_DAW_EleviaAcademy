@@ -1,6 +1,6 @@
 <script setup>
 import PublicLayout from '@/Layouts/PublicLayout.vue';
-import { courseImageByTitle } from '@/utils/courseImages';
+import { getCourseImage } from '@/utils/courseImages';
 import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({
@@ -117,7 +117,7 @@ const features = [
                     class="flex h-full flex-col overflow-hidden rounded-2xl border border-cyan-500/20 bg-slate-900/70"
                 >
                     <img
-                        :src="courseImageByTitle(course.title)"
+                        :src="getCourseImage(course)"
                         :alt="course.title"
                         class="h-44 w-full object-cover"
                         @error="$event.target.src = '/imagenes/logo/Logo_EA.jpg'"

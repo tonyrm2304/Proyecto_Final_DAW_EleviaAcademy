@@ -27,6 +27,20 @@
               <p v-if="form.errors.title" class="mt-2 text-sm text-rose-400">{{ form.errors.title[0] }}</p>
             </div>
 
+            <!-- Imagen del curso -->
+            <div>
+              <label for="image" class="block text-sm font-semibold text-slate-200">Imagen del Curso</label>
+              <input
+                id="image"
+                type="file"
+                accept="image/*"
+                class="mt-2 block w-full rounded-lg border border-slate-700 bg-slate-800 shadow-sm text-slate-100 px-4 py-2.5 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white file:cursor-pointer hover:file:bg-cyan-500"
+                @change="onImageChange"
+              />
+              <p v-if="form.errors.image" class="mt-2 text-sm text-rose-400">{{ form.errors.image[0] }}</p>
+              <p class="mt-1 text-xs text-slate-400">JPG, PNG o WebP. Máximo 5MB</p>
+            </div>
+
             <!-- Descripción corta -->
             <div>
               <label for="short_description" class="block text-sm font-semibold text-slate-200">Descripción Corta (Catálogo)</label>
@@ -117,7 +131,12 @@ const form = useForm({
   long_description: props.course?.long_description || '',
   duration_hours: props.course?.duration_hours || 20,
   category_id: props.course?.category_id || null,
+  image: null,
 })
+
+const onImageChange = (event) => {
+  form.image = event.target.files[0] || null
+}
 
 const submit = () => {
   if (props.course) {

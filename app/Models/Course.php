@@ -16,6 +16,7 @@ class Course extends Model
         'category_id',
         'teacher_id',
         'is_hidden',
+        'image_path',
     ];
 
     protected $casts = [

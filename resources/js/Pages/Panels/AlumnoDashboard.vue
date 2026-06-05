@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { courseImageByTitle } from '@/utils/courseImages';
+import { getCourseImage } from '@/utils/courseImages';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -33,7 +33,7 @@ const submittedTasksCount = (courseId) => {
     return tasks.filter(Boolean).length;
 };
 
-const courseImage = (title) => courseImageByTitle(title);
+const courseImage = (course) => getCourseImage(course);
 </script>
 
 <template>
@@ -81,7 +81,7 @@ const courseImage = (title) => courseImageByTitle(title);
 
                 <div class="mt-6 grid gap-5 lg:grid-cols-2">
                     <article v-for="course in enrolledCourses" :key="course.id" class="flex h-full flex-col overflow-hidden rounded-xl border border-slate-700 bg-slate-800/80">
-                        <img :src="courseImage(course.title)" :alt="course.title" class="h-44 w-full object-cover" @error="$event.target.src = '/imagenes/logo/Logo_EA.jpg'">
+                        <img :src="courseImage(course)" :alt="course.title" class="h-44 w-full object-cover" @error="$event.target.src = '/imagenes/logo/Logo_EA.jpg'">
 
                         <div class="flex flex-1 flex-col p-5">
                             <div class="flex items-start justify-between gap-4">

@@ -26,3 +26,10 @@ export const courseImageByTitle = (title) => {
         ? `/imagenes/cursos_imagenes/${fileName}`
         : '/imagenes/logo/Logo_EA.jpg';
 };
+
+export const getCourseImage = (course) => {
+    if (course.image_path) {
+        return `/storage/${course.image_path}`;
+    }
+    return courseImageByTitle(course.title);
+};

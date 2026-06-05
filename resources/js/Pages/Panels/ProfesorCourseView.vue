@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { courseImageByTitle } from '@/utils/courseImages';
+import { getCourseImage } from '@/utils/courseImages';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
 
@@ -125,7 +125,7 @@ const submitExamResult = () => {
 const studentGrade = (student, taskNumber) => student?.state?.grades?.[`task${taskNumber}`] ?? 'Pendiente';
 const taskSubmission = (student, taskNumber) => student?.state?.task_submissions?.[`task${taskNumber}`] ?? null;
 
-const courseImage = computed(() => courseImageByTitle(props.course.title));
+const courseImage = computed(() => getCourseImage(props.course));
 </script>
 
 <template>

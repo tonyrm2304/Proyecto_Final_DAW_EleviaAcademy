@@ -515,7 +515,13 @@ class PanelActionsController extends Controller
             'long_description' => ['required', 'string', 'max:2000'],
             'duration_hours' => ['required', 'integer', 'min:1', 'max:200'],
             'category_id' => ['required', 'exists:categories,id'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
         ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('courses', 'public');
+        }
 
         $course = Course::create([
             'title' => $validated['title'],
@@ -525,6 +531,7 @@ class PanelActionsController extends Controller
             'category_id' => $validated['category_id'],
             'teacher_id' => $request->user()->id,
             'is_hidden' => true,
+            'image_path' => $imagePath,
         ]);
 
         return redirect()->route('panel.profesor.course', $course)->with('success', 'Curso creado exitosamente.');
@@ -546,8 +553,17 @@ class PanelActionsController extends Controller
             'long_description' => ['required', 'string', 'max:2000'],
             'duration_hours' => ['required', 'integer', 'min:1', 'max:200'],
             'category_id' => ['required', 'exists:categories,id'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
         ]);
 
+        if ($request->hasFile('image')) {
+            if ($course->image_path) {
+                Storage::disk('public')->delete($course->image_path);
+            }
+            $validated['image_path'] = $request->file('image')->store('courses', 'public');
+        }
+
+        unset($validated['image']);
         $course->update($validated);
 
         return back()->with('success', 'Curso actualizado exitosamente.');

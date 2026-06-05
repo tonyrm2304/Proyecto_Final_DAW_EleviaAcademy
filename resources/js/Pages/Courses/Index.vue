@@ -1,6 +1,6 @@
 <script setup>
 import PublicLayout from '@/Layouts/PublicLayout.vue';
-import { courseImageByTitle } from '@/utils/courseImages';
+import { getCourseImage } from '@/utils/courseImages';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -128,7 +128,7 @@ const recommendedCourses = computed(() => {
                     class="flex h-full flex-col overflow-hidden rounded-2xl border border-cyan-500/20 bg-slate-900/70"
                 >
                     <img
-                        :src="courseImageByTitle(course.title)"
+                        :src="getCourseImage(course)"
                         :alt="course.title"
                         class="h-44 w-full object-cover"
                         @error="$event.target.src = '/imagenes/logo/Logo_EA.jpg'"
@@ -144,7 +144,7 @@ const recommendedCourses = computed(() => {
                             Docente: {{ course.teacher?.name ?? 'Asignación pendiente' }}
                         </p>
                         <Link
-                            :href="route('contact.show')"
+                            :href="route('login')"
                             class="mt-auto block w-full rounded-lg bg-blue-500 px-4 py-2.5 text-center font-semibold text-white transition hover:bg-blue-400"
                         >
                             Inscríbete
@@ -159,9 +159,9 @@ const recommendedCourses = computed(() => {
         </section>
 
         <section class="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-            <div class="rounded-2xl border border-slate-700 bg-slate-900/60 p-6">
-                <h2 class="text-2xl font-bold text-white">Orientador de cursos</h2>
-                <p class="mt-2 text-sm text-slate-300">Responde 4 preguntas y te mostramos 3 opciones recomendadas.</p>
+            <div class="rounded-2xl border border-cyan-500/20 bg-slate-900/70 p-6">
+                <h2 class="text-3xl font-extrabold text-white">Orientador de Cursos (Test de Afinidades)</h2>
+                <p class="mt-2 text-slate-300">Responde 4 preguntas y te recomendamos los 3 cursos más adecuados para tu perfil.</p>
 
                 <div class="mt-6 grid gap-4 md:grid-cols-2">
                     <div>
@@ -205,7 +205,7 @@ const recommendedCourses = computed(() => {
                 </div>
 
                 <div class="mt-6 rounded-xl border border-slate-700 bg-slate-800/70 p-4">
-                    <h3 class="text-lg font-semibold text-slate-100">3 cursos recomendados</h3>
+                    <h3 class="text-xl font-bold text-cyan-300">Top 3 recomendados</h3>
                     <ul class="mt-3 space-y-2">
                         <li
                             v-for="course in recommendedCourses"
@@ -214,7 +214,7 @@ const recommendedCourses = computed(() => {
                         >
                             <p class="font-semibold text-white">{{ course.title }}</p>
                             <p class="text-xs text-slate-300">
-                                {{ course.category?.name ?? 'General' }} · {{ course.duration_hours }}h
+                                {{ course.category?.name ?? 'General' }} · {{ course.duration_hours }}h · Afinidad {{ course.score }}
                             </p>
                         </li>
                         <li v-if="!orientadorReady" class="text-sm text-slate-400">Completa las 4 respuestas para ver recomendaciones.</li>
